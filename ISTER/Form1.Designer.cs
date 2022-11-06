@@ -28,25 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
             this.label1 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.label4 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
+            this.listBox2 = new System.Windows.Forms.ListBox();
+            this.listBox3 = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
-            // 
-            // checkedListBox1
-            // 
-            this.checkedListBox1.FormattingEnabled = true;
-            this.checkedListBox1.Location = new System.Drawing.Point(-1, 51);
-            this.checkedListBox1.Name = "checkedListBox1";
-            this.checkedListBox1.Size = new System.Drawing.Size(243, 246);
-            this.checkedListBox1.TabIndex = 0;
             // 
             // label1
             // 
@@ -63,7 +55,7 @@
             this.textBox1.Location = new System.Drawing.Point(264, 51);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(504, 246);
+            this.textBox1.Size = new System.Drawing.Size(504, 233);
             this.textBox1.TabIndex = 2;
             // 
             // label2
@@ -74,14 +66,6 @@
             this.label2.Size = new System.Drawing.Size(54, 20);
             this.label2.TabIndex = 3;
             this.label2.Text = "Вывод";
-            // 
-            // textBox2
-            // 
-            this.textBox2.Location = new System.Drawing.Point(264, 341);
-            this.textBox2.Multiline = true;
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(504, 208);
-            this.textBox2.TabIndex = 4;
             // 
             // label3
             // 
@@ -98,7 +82,7 @@
             this.listBox1.ItemHeight = 20;
             this.listBox1.Location = new System.Drawing.Point(10, 341);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(232, 164);
+            this.listBox1.Size = new System.Drawing.Size(232, 204);
             this.listBox1.TabIndex = 6;
             // 
             // label4
@@ -128,21 +112,43 @@
             this.button2.Text = "Не тот рычаг!";
             this.button2.UseVisualStyleBackColor = true;
             // 
+            // listBox2
+            // 
+            this.listBox2.FormattingEnabled = true;
+            this.listBox2.ItemHeight = 20;
+            this.listBox2.Location = new System.Drawing.Point(264, 340);
+            this.listBox2.Name = "listBox2";
+            this.listBox2.Size = new System.Drawing.Size(504, 204);
+            this.listBox2.TabIndex = 10;
+            this.listBox2.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
+            this.listBox2.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox2_MouseDoubleClick);
+            // 
+            // listBox3
+            // 
+            this.listBox3.FormattingEnabled = true;
+            this.listBox3.ItemHeight = 20;
+            this.listBox3.Location = new System.Drawing.Point(8, 60);
+            this.listBox3.Name = "listBox3";
+            this.listBox3.Size = new System.Drawing.Size(234, 224);
+            this.listBox3.TabIndex = 11;
+            this.listBox3.SelectedIndexChanged += new System.EventHandler(this.listBox3_SelectedIndexChanged);
+            this.listBox3.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox3_MouseDoubleClick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1223, 615);
+            this.Controls.Add(this.listBox3);
+            this.Controls.Add(this.listBox2);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.listBox1);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.textBox2);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.checkedListBox1);
             this.Name = "Form1";
             this.Text = "Form1";
             this.ResumeLayout(false);
@@ -151,16 +157,15 @@
         }
 
         #endregion
-
-        private CheckedListBox checkedListBox1;
         private Label label1;
         private TextBox textBox1;
         private Label label2;
-        private TextBox textBox2;
         private Label label3;
         private ListBox listBox1;
         private Label label4;
         private Button button1;
         private Button button2;
+        private ListBox listBox2;
+        private ListBox listBox3;
     }
 }

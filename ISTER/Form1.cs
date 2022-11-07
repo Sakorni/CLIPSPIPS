@@ -166,47 +166,46 @@ namespace ISTER
             var firstFact = item.Split(":")[0].Trim();
 
             HashSet<string> colors = new();
-            Queue<string> q = new();
-            q.Enqueue(firstFact);
-            while(q.Count > 0)
+            NOTRECURSIVECall(ref colors, firstFact);
+           
+            outputBox.AppendText("Ну вот и всё! Террария - это просто!");
+            outputBox.AppendText(Environment.NewLine);
+        }
+
+        private void NOTRECURSIVECall(ref HashSet<string> colors, string fact, int deep = 0)
+        {
+            var prefix = new string('>', deep);
+            colors.Add(fact);
+            outputBox.AppendText($"{prefix}Хотим получить: {fact} ({facts[fact]})");
+            outputBox.AppendText(Environment.NewLine);
+
+            if (!facts_to_rules.ContainsKey(fact))
             {
-                outputBox.AppendText("------------------");
+                outputBox.AppendText($"{prefix}А для его вывода никаких правил и не надо");
                 outputBox.AppendText(Environment.NewLine);
-                var fact = q.Dequeue();
-                colors.Add(fact);
-                outputBox.AppendText($"Хотим получить: {fact} ({facts[fact]})");
-                outputBox.AppendText(Environment.NewLine);
-                
-                if (!facts_to_rules.ContainsKey(fact))
+                return;
+            }
+
+            var ruleID = facts_to_rules[fact];
+            var rule = rules[ruleID];
+            outputBox.AppendText($"{prefix}Понадобится правило: {rule}");
+            outputBox.AppendText(Environment.NewLine);
+            var precond = rule.preconds;
+            outputBox.AppendText($"{prefix}Для работы этого правила нужны факты: {string.Join(", ", precond)}");
+            outputBox.AppendText(Environment.NewLine);
+            foreach (var factCond in precond)
+            {
+                if (colors.Contains(factCond))
                 {
-                    outputBox.AppendText("А для его вывода никаких правил и не надо");
+                    outputBox.AppendText($"{prefix}Факт {factCond} ({facts[factCond]}) мы уже получили ранее (надеюсь)");
                     outputBox.AppendText(Environment.NewLine);
                     continue;
                 }
-
-                var ruleID = facts_to_rules[fact];
-                var rule = rules[ruleID];
-                outputBox.AppendText($"Понадобится правило: {rule}");
-                outputBox.AppendText(Environment.NewLine);
-                var precond = rule.preconds;
-                outputBox.AppendText($"Для работы этого правила нужны факты: {string.Join(", ",precond)}");
-                outputBox.AppendText(Environment.NewLine);
-                foreach(var factCond in precond)
-                {
-                    if (colors.Contains(factCond))
-                    {
-                        outputBox.AppendText($"Факт {factCond} ({facts[fact]}) мы уже получили ранее (надеюсь)");
-                        outputBox.AppendText(Environment.NewLine);
-                        continue;
-                    }
-                    q.Enqueue(factCond);
-                }
+                NOTRECURSIVECall(ref colors, factCond, deep + 1);
             }
-            outputBox.AppendText("Ну вот и всё! Террария - это просто!");
-            outputBox.AppendText(Environment.NewLine);
-
-
         }
+
+
         /// <summary>
         /// Возвращает список фактов, которые нужны для выполнения правила, возвращающего предоставленный факт
         /// </summary>

@@ -3,7 +3,10 @@ namespace ISTER
     public partial class Form1 : Form
     {
         public static SortedDictionary<string, string> facts = new();
-        public static SortedDictionary<string, string> facts_to_rules = new(); // ключ - id факта, значение - какое правило его выводит
+        /// <summary>
+        /// ключ - id факта, значение - id правила
+        /// </summary>
+        public static SortedDictionary<string, string> facts_to_rules = new(); 
         private static Dictionary<string, Rule> rules = new();
         private static HashSet<string> chosen_facts = new();
         //
@@ -115,12 +118,12 @@ namespace ISTER
 
         private void button1_Click(object sender, EventArgs e)
         {
+            outputBox.Clear();
             if (chosen_facts.Count == 0)
             {
-                outputBox.Text = "Ой, а Вы ничего не выбрали, с чем мне работать-то?";
+                outputBox.AppendText("Ой, а ничего не выбрали, с чем мне работать-то?");
                 return;
             };
-            outputBox.Clear();
             var rerun = true;
             var possibleRules = rules.Values.ToHashSet();
             while (rerun)
@@ -148,6 +151,75 @@ namespace ISTER
         {
             chosen_facts.Clear();
             chosenBox.Items.Clear();
+        }
+
+        private void factsFromRuleButton_Click(object sender, EventArgs e)
+        {
+            outputBox.Clear();
+            var item = ruleBox.SelectedItem.ToString();
+            if (item == null)
+            {
+                outputBox.AppendText("Nothing to write home about m8");
+                return;
+            }
+
+            var firstFact = item.Split(":")[0].Trim();
+
+            HashSet<string> colors = new();
+            Queue<string> q = new();
+            q.Enqueue(firstFact);
+            while(q.Count > 0)
+            {
+                outputBox.AppendText("------------------");
+                outputBox.AppendText(Environment.NewLine);
+                var fact = q.Dequeue();
+                colors.Add(fact);
+                outputBox.AppendText($"Хотим получить: {fact} ({facts[fact]})");
+                outputBox.AppendText(Environment.NewLine);
+                
+                if (!facts_to_rules.ContainsKey(fact))
+                {
+                    outputBox.AppendText("А для его вывода никаких правил и не надо");
+                    outputBox.AppendText(Environment.NewLine);
+                    continue;
+                }
+
+                var ruleID = facts_to_rules[fact];
+                var rule = rules[ruleID];
+                outputBox.AppendText($"Понадобится правило: {rule}");
+                outputBox.AppendText(Environment.NewLine);
+                var precond = rule.preconds;
+                outputBox.AppendText($"Для работы этого правила нужны факты: {string.Join(", ",precond)}");
+                outputBox.AppendText(Environment.NewLine);
+                foreach(var factCond in precond)
+                {
+                    if (colors.Contains(factCond))
+                    {
+                        outputBox.AppendText($"Факт {factCond} ({facts[fact]}) мы уже получили ранее (надеюсь)");
+                        outputBox.AppendText(Environment.NewLine);
+                        continue;
+                    }
+                    q.Enqueue(factCond);
+                }
+            }
+            outputBox.AppendText("Ну вот и всё! Террария - это просто!");
+            outputBox.AppendText(Environment.NewLine);
+
+
+        }
+        /// <summary>
+        /// Возвращает список фактов, которые нужны для выполнения правила, возвращающего предоставленный факт
+        /// </summary>
+        /// <param name="fact"></param>
+        /// <returns></returns>
+        private List<string> preconditions_from_fact(string fact)
+        {
+            return rules[facts_to_rules[fact]].preconds;
+        }
+
+        private void ruleBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

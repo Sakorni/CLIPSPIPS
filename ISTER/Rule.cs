@@ -19,7 +19,7 @@ namespace ISTER
             Regex regex = new Regex(@"^(r\d+): (.*) -> (\w+\d+) # (.*)$");
             var match = regex.Match(raw_rule);
             Name = match.Groups[1].Value;
-            preconds = match.Groups[2].Value.Split(',').ToList();
+            preconds = match.Groups[2].Value.Split(", ").ToList();
             conseq = match.Groups[3].Value;
             readable_form = match.Groups[4].Value;
         }

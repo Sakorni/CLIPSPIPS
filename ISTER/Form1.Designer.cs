@@ -85,6 +85,7 @@
             this.ruleBox.Name = "ruleBox";
             this.ruleBox.Size = new System.Drawing.Size(232, 204);
             this.ruleBox.TabIndex = 6;
+            this.ruleBox.SelectedIndexChanged += new System.EventHandler(this.ruleBox_SelectedIndexChanged);
             // 
             // label4
             // 
@@ -113,6 +114,7 @@
             this.factsFromRuleButton.TabIndex = 9;
             this.factsFromRuleButton.Text = "Не тот рычаг!";
             this.factsFromRuleButton.UseVisualStyleBackColor = true;
+            this.factsFromRuleButton.Click += new System.EventHandler(this.factsFromRuleButton_Click);
             // 
             // chosenBox
             // 

@@ -23,11 +23,11 @@ namespace ISTER
         {
             foreach (var item in facts.Keys)
             {
-                    listBox3.Items.Add( $"{item}: {facts[item]}");
+                    factsBox.Items.Add( $"{item}: {facts[item]}");
             }
             foreach(var item in facts_to_rules.Keys)
             {
-                listBox1.Items.Add($"{item}: {facts[item]}");
+                ruleBox.Items.Add($"{item}: {facts[item]}");
             }
         }
         /// <summary>
@@ -94,23 +94,60 @@ namespace ISTER
 
         private void listBox3_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            var selected = listBox3.SelectedItem;
+            var selected = factsBox.SelectedItem;
             if (selected == null) return;
             var fact = selected.ToString().Split(":")[0];
             var readable_form = $"{fact}: {facts[fact]}";
             if (chosen_facts.Contains(fact)) return;
             chosen_facts.Add(fact);
-            listBox2.Items.Add(readable_form);
+            chosenBox.Items.Add(readable_form);
         }
 
         private void listBox2_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            var selected = listBox2.SelectedItem;
+            var selected = chosenBox.SelectedItem;
             if (selected == null) return;
             var fact = selected.ToString().Split(":")[0];
             var readable_form = $"{fact}: {facts[fact]}";
             chosen_facts.Remove(fact);
-            listBox2.Items.Remove(readable_form);
+            chosenBox.Items.Remove(readable_form);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (chosen_facts.Count == 0)
+            {
+                outputBox.Text = "Ой, а Вы ничего не выбрали, с чем мне работать-то?";
+                return;
+            };
+            outputBox.Clear();
+            var rerun = true;
+            var possibleRules = rules.Values.ToHashSet();
+            while (rerun)
+            {
+                rerun = false;
+                foreach(var rule in possibleRules)
+                {
+                    if (rule.compare(chosen_facts.ToList()))
+                    {
+                        chosen_facts.Add(rule.conseq);
+                        outputBox.AppendText(rule.ToString());
+                        outputBox.AppendText(Environment.NewLine);
+                        possibleRules.Remove(rule);
+                        rerun = true;
+                    }
+                }
+            }
+            if(outputBox.Text.Length == 0)
+            {
+                outputBox.AppendText("Не, бро, сорян, из этого вообще ничего не сварить");
+            }
+        }
+
+        private void clearChosenButton_Click(object sender, EventArgs e)
+        {
+            chosen_facts.Clear();
+            chosenBox.Items.Clear();
         }
     }
 }

@@ -29,15 +29,16 @@
         private void InitializeComponent()
         {
             this.label1 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.outputBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.listBox1 = new System.Windows.Forms.ListBox();
+            this.ruleBox = new System.Windows.Forms.ListBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.listBox2 = new System.Windows.Forms.ListBox();
-            this.listBox3 = new System.Windows.Forms.ListBox();
+            this.rulesFromFactsButton = new System.Windows.Forms.Button();
+            this.factsFromRuleButton = new System.Windows.Forms.Button();
+            this.chosenBox = new System.Windows.Forms.ListBox();
+            this.factsBox = new System.Windows.Forms.ListBox();
+            this.clearChosenButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -50,13 +51,13 @@
             this.label1.Text = "Что есть";
             this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
-            // textBox1
+            // outputBox
             // 
-            this.textBox1.Location = new System.Drawing.Point(264, 51);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(504, 233);
-            this.textBox1.TabIndex = 2;
+            this.outputBox.Location = new System.Drawing.Point(264, 51);
+            this.outputBox.Multiline = true;
+            this.outputBox.Name = "outputBox";
+            this.outputBox.Size = new System.Drawing.Size(504, 233);
+            this.outputBox.TabIndex = 2;
             // 
             // label2
             // 
@@ -76,14 +77,14 @@
             this.label3.TabIndex = 5;
             this.label3.Text = "Выбранные предметы";
             // 
-            // listBox1
+            // ruleBox
             // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.ItemHeight = 20;
-            this.listBox1.Location = new System.Drawing.Point(10, 341);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(232, 204);
-            this.listBox1.TabIndex = 6;
+            this.ruleBox.FormattingEnabled = true;
+            this.ruleBox.ItemHeight = 20;
+            this.ruleBox.Location = new System.Drawing.Point(10, 341);
+            this.ruleBox.Name = "ruleBox";
+            this.ruleBox.Size = new System.Drawing.Size(232, 204);
+            this.ruleBox.TabIndex = 6;
             // 
             // label4
             // 
@@ -94,60 +95,72 @@
             this.label4.TabIndex = 7;
             this.label4.Text = "Что хотим получить";
             // 
-            // button1
+            // rulesFromFactsButton
             // 
-            this.button1.Location = new System.Drawing.Point(816, 51);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(283, 224);
-            this.button1.TabIndex = 8;
-            this.button1.Text = "Жми на рычаг, Кронк";
-            this.button1.UseVisualStyleBackColor = true;
+            this.rulesFromFactsButton.Location = new System.Drawing.Point(816, 51);
+            this.rulesFromFactsButton.Name = "rulesFromFactsButton";
+            this.rulesFromFactsButton.Size = new System.Drawing.Size(283, 224);
+            this.rulesFromFactsButton.TabIndex = 8;
+            this.rulesFromFactsButton.Text = "Жми на рычаг, Кронк";
+            this.rulesFromFactsButton.UseVisualStyleBackColor = true;
+            this.rulesFromFactsButton.Click += new System.EventHandler(this.button1_Click);
             // 
-            // button2
+            // factsFromRuleButton
             // 
-            this.button2.Location = new System.Drawing.Point(829, 341);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(270, 208);
-            this.button2.TabIndex = 9;
-            this.button2.Text = "Не тот рычаг!";
-            this.button2.UseVisualStyleBackColor = true;
+            this.factsFromRuleButton.Location = new System.Drawing.Point(829, 341);
+            this.factsFromRuleButton.Name = "factsFromRuleButton";
+            this.factsFromRuleButton.Size = new System.Drawing.Size(270, 208);
+            this.factsFromRuleButton.TabIndex = 9;
+            this.factsFromRuleButton.Text = "Не тот рычаг!";
+            this.factsFromRuleButton.UseVisualStyleBackColor = true;
             // 
-            // listBox2
+            // chosenBox
             // 
-            this.listBox2.FormattingEnabled = true;
-            this.listBox2.ItemHeight = 20;
-            this.listBox2.Location = new System.Drawing.Point(264, 340);
-            this.listBox2.Name = "listBox2";
-            this.listBox2.Size = new System.Drawing.Size(504, 204);
-            this.listBox2.TabIndex = 10;
-            this.listBox2.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
-            this.listBox2.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox2_MouseDoubleClick);
+            this.chosenBox.FormattingEnabled = true;
+            this.chosenBox.ItemHeight = 20;
+            this.chosenBox.Location = new System.Drawing.Point(264, 340);
+            this.chosenBox.Name = "chosenBox";
+            this.chosenBox.Size = new System.Drawing.Size(504, 204);
+            this.chosenBox.TabIndex = 10;
+            this.chosenBox.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
+            this.chosenBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox2_MouseDoubleClick);
             // 
-            // listBox3
+            // factsBox
             // 
-            this.listBox3.FormattingEnabled = true;
-            this.listBox3.ItemHeight = 20;
-            this.listBox3.Location = new System.Drawing.Point(8, 60);
-            this.listBox3.Name = "listBox3";
-            this.listBox3.Size = new System.Drawing.Size(234, 224);
-            this.listBox3.TabIndex = 11;
-            this.listBox3.SelectedIndexChanged += new System.EventHandler(this.listBox3_SelectedIndexChanged);
-            this.listBox3.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox3_MouseDoubleClick);
+            this.factsBox.FormattingEnabled = true;
+            this.factsBox.ItemHeight = 20;
+            this.factsBox.Location = new System.Drawing.Point(8, 60);
+            this.factsBox.Name = "factsBox";
+            this.factsBox.Size = new System.Drawing.Size(234, 224);
+            this.factsBox.TabIndex = 11;
+            this.factsBox.SelectedIndexChanged += new System.EventHandler(this.listBox3_SelectedIndexChanged);
+            this.factsBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox3_MouseDoubleClick);
+            // 
+            // clearChosenButton
+            // 
+            this.clearChosenButton.Location = new System.Drawing.Point(264, 550);
+            this.clearChosenButton.Name = "clearChosenButton";
+            this.clearChosenButton.Size = new System.Drawing.Size(94, 29);
+            this.clearChosenButton.TabIndex = 12;
+            this.clearChosenButton.Text = "Очистить";
+            this.clearChosenButton.UseVisualStyleBackColor = true;
+            this.clearChosenButton.Click += new System.EventHandler(this.clearChosenButton_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1223, 615);
-            this.Controls.Add(this.listBox3);
-            this.Controls.Add(this.listBox2);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(1359, 615);
+            this.Controls.Add(this.clearChosenButton);
+            this.Controls.Add(this.factsBox);
+            this.Controls.Add(this.chosenBox);
+            this.Controls.Add(this.factsFromRuleButton);
+            this.Controls.Add(this.rulesFromFactsButton);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.listBox1);
+            this.Controls.Add(this.ruleBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.outputBox);
             this.Controls.Add(this.label1);
             this.Name = "Form1";
             this.Text = "Form1";
@@ -158,14 +171,15 @@
 
         #endregion
         private Label label1;
-        private TextBox textBox1;
+        private TextBox outputBox;
         private Label label2;
         private Label label3;
-        private ListBox listBox1;
+        private ListBox ruleBox;
         private Label label4;
-        private Button button1;
-        private Button button2;
-        private ListBox listBox2;
-        private ListBox listBox3;
+        private Button rulesFromFactsButton;
+        private Button factsFromRuleButton;
+        private ListBox chosenBox;
+        private ListBox factsBox;
+        private Button clearChosenButton;
     }
 }

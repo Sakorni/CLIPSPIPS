@@ -9,13 +9,18 @@ namespace ISTER
         public static SortedDictionary<string, string> facts_to_rules = new(); 
         private static Dictionary<string, Rule> rules = new();
         private static HashSet<string> chosen_facts = new();
-        //
+        /// <summary>
+        /// Ключ - факт, значение - какие факты нужны для получения этого факта
+        /// Имитация (мудрого) дерева
+        /// </summary>
+        private static Dictionary<string, List<string>> facts_tree = new();
 
         public Form1()
         {
             InitializeComponent();
             facts = Get_facts("../../../facts.txt");
             rules = Get_rules("../../../rules.txt");
+            build_tree();
             load();
         }
 
@@ -153,53 +158,71 @@ namespace ISTER
             chosenBox.Items.Clear();
         }
 
+        private void build_tree()
+        {
+            foreach(var fact in facts.Keys)
+            {
+                List<string> preconditions = null;
+                if (facts_to_rules.ContainsKey(fact))
+                {
+                    preconditions = preconditions_from_fact(fact);
+                }
+                facts_tree.Add(fact, preconditions);
+            }
+        }
+
         private void factsFromRuleButton_Click(object sender, EventArgs e)
         {
             outputBox.Clear();
-            var item = ruleBox.SelectedItem.ToString();
+            var item = ruleBox.SelectedItem;
             if (item == null)
             {
                 outputBox.AppendText("Nothing to write home about m8");
                 return;
             }
 
-            var firstFact = item.Split(":")[0].Trim();
+            var firstFact = item.ToString().Split(":")[0].Trim();
 
             HashSet<string> colors = new();
-            Queue<string> q = new();
-            q.Enqueue(firstFact);
-            while(q.Count > 0)
+            Stack<string> s = new();
+            
+            s.Push(firstFact);
+            while(s.Count > 0)
             {
                 outputBox.AppendText("------------------");
                 outputBox.AppendText(Environment.NewLine);
-                var fact = q.Dequeue();
+                var fact = s.Pop();
                 colors.Add(fact);
                 outputBox.AppendText($"Хотим получить: {fact} ({facts[fact]})");
                 outputBox.AppendText(Environment.NewLine);
-                
-                if (!facts_to_rules.ContainsKey(fact))
+
+                var precs = facts_tree[fact];
+                if (precs == null)
                 {
                     outputBox.AppendText("А для его вывода никаких правил и не надо");
                     outputBox.AppendText(Environment.NewLine);
                     continue;
                 }
-
+                
+                /*
                 var ruleID = facts_to_rules[fact];
                 var rule = rules[ruleID];
-                outputBox.AppendText($"Понадобится правило: {rule}");
+                outputBox.AppendText($"Понадобится правило: {rule}"); // TODO: можешь избавиться от правил, тогда использование дерева будет более оправданным, но не будешь говорить, какие факты нужны
                 outputBox.AppendText(Environment.NewLine);
-                var precond = rule.preconds;
-                outputBox.AppendText($"Для работы этого правила нужны факты: {string.Join(", ",precond)}");
+                */
+
+                outputBox.AppendText($"Для получения этого факта нам нужны факты: {string.Join(", ",precs)}");
                 outputBox.AppendText(Environment.NewLine);
-                foreach(var factCond in precond)
+
+                foreach(var factCond in precs)
                 {
                     if (colors.Contains(factCond))
                     {
-                        outputBox.AppendText($"Факт {factCond} ({facts[fact]}) мы уже получили ранее (надеюсь)");
+                        outputBox.AppendText($"Факт {factCond} ({facts[factCond]}) мы уже получили ранее (надеюсь)");
                         outputBox.AppendText(Environment.NewLine);
                         continue;
                     }
-                    q.Enqueue(factCond);
+                    s.Push(factCond);
                 }
             }
             outputBox.AppendText("Ну вот и всё! Террария - это просто!");

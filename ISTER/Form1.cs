@@ -170,6 +170,8 @@ namespace ISTER
         {
             chosen_facts.Clear();
             chosenFactsBox.Items.Clear();
+            chosenRuleBox.Items.Clear();
+            outputBox.Clear();
         }
 
         private void factsFromRuleButton_Click(object sender, EventArgs e)
@@ -226,6 +228,7 @@ namespace ISTER
             outp.Add($"Понадобится правило: {rule}");
             List<string>precond = new();
             bool all = true;
+            outp.Add($"Для работы этого правила нужны факты: {string.Join(", ", rule.preconds)}");
             foreach (var p in rule.preconds)
             {
                 if (!inventory.Contains(p))
@@ -236,7 +239,6 @@ namespace ISTER
             }
             if (precond.Count == 0) return true;
 
-            outp.Add($"Для работы этого правила нужны ещё факты: {string.Join(", ", precond)}");
             bool answer = true;
             foreach (var factCond in precond)
             {
@@ -273,7 +275,13 @@ namespace ISTER
 
         private void ruleBox_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-
+            chosenRuleBox.Items.Clear();
+            var selected = ruleBox.SelectedItem;
+            if (selected == null) return;
+            var fact = selected.ToString().Split(":")[0];
+            var readable_form = $"{fact}: {facts[fact]}";
+            chosen_facts.Add(fact);
+            chosenRuleBox.Items.Add(readable_form);
         }
     }
 }

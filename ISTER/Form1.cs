@@ -103,29 +103,34 @@ namespace ISTER
             var readable_form = $"{fact}: {facts[fact]}";
             if (chosen_facts.Contains(fact)) return;
             chosen_facts.Add(fact);
-            chosenBox.Items.Add(readable_form);
+            chosenFactsBox.Items.Add(readable_form);
         }
 
         private void listBox2_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            var selected = chosenBox.SelectedItem;
+            var selected = chosenFactsBox.SelectedItem;
             if (selected == null) return;
             var fact = selected.ToString().Split(":")[0];
             var readable_form = $"{fact}: {facts[fact]}";
             chosen_facts.Remove(fact);
-            chosenBox.Items.Remove(readable_form);
+            chosenFactsBox.Items.Remove(readable_form);
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             outputBox.Clear();
-            if (chosen_facts.Count == 0)
+            var selected_rule = ruleBox.SelectedItem;
+            if (chosen_facts.Count == 0 || selected_rule == null)
             {
                 outputBox.AppendText("Ой, а ничего не выбрали, с чем мне работать-то?");
                 return;
             };
+
             var rerun = true;
+            var found = false;
             var possibleRules = rules.Values.ToHashSet();
+            var looking_for = selected_rule.ToString().Split(":")[0].Trim();
+            List<string> output = new();
             while (rerun)
             {
                 rerun = false;
@@ -134,23 +139,37 @@ namespace ISTER
                     if (rule.compare(chosen_facts.ToList()))
                     {
                         chosen_facts.Add(rule.conseq);
-                        outputBox.AppendText(rule.ToString());
-                        outputBox.AppendText(Environment.NewLine);
+                        output.Add(rule.ToString());
                         possibleRules.Remove(rule);
+                        if (rule.conseq == looking_for)
+                        {
+                            rerun = false;
+                            found = true;
+                            break;
+                        }
                         rerun = true;
                     }
+                    
                 }
             }
-            if(outputBox.Text.Length == 0)
+            if (!found)
             {
-                outputBox.AppendText("Не, бро, сорян, из этого вообще ничего не сварить");
+                outputBox.AppendText("Нельзя");
+                return;
+            }
+
+            outputBox.AppendText("Льзя");
+            foreach (var s in output)
+            {
+                outputBox.AppendText(s);
+                outputBox.AppendText(Environment.NewLine);
             }
         }
 
         private void clearChosenButton_Click(object sender, EventArgs e)
         {
             chosen_facts.Clear();
-            chosenBox.Items.Clear();
+            chosenFactsBox.Items.Clear();
         }
 
         private void factsFromRuleButton_Click(object sender, EventArgs e)
@@ -165,48 +184,73 @@ namespace ISTER
 
             var firstFact = item.Split(":")[0].Trim();
 
+            HashSet<string> inventory = chosen_facts;
             HashSet<string> colors = new();
-            Queue<string> q = new();
-            q.Enqueue(firstFact);
-            while(q.Count > 0)
+            List<string> outp = new();
+            bool answer = Recursion(firstFact, ref inventory, ref colors, ref outp);
+            if (answer)
             {
-                outputBox.AppendText("------------------");
-                outputBox.AppendText(Environment.NewLine);
-                var fact = q.Dequeue();
-                colors.Add(fact);
-                outputBox.AppendText($"Хотим получить: {fact} ({facts[fact]})");
-                outputBox.AppendText(Environment.NewLine);
-                
-                if (!facts_to_rules.ContainsKey(fact))
-                {
-                    outputBox.AppendText("А для его вывода никаких правил и не надо");
-                    outputBox.AppendText(Environment.NewLine);
-                    continue;
-                }
-
-                var ruleID = facts_to_rules[fact];
-                var rule = rules[ruleID];
-                outputBox.AppendText($"Понадобится правило: {rule}");
-                outputBox.AppendText(Environment.NewLine);
-                var precond = rule.preconds;
-                outputBox.AppendText($"Для работы этого правила нужны факты: {string.Join(", ",precond)}");
-                outputBox.AppendText(Environment.NewLine);
-                foreach(var factCond in precond)
-                {
-                    if (colors.Contains(factCond))
-                    {
-                        outputBox.AppendText($"Факт {factCond} ({facts[fact]}) мы уже получили ранее (надеюсь)");
-                        outputBox.AppendText(Environment.NewLine);
-                        continue;
-                    }
-                    q.Enqueue(factCond);
-                }
-            }
-            outputBox.AppendText("Ну вот и всё! Террария - это просто!");
+            outputBox.AppendText("Можно");
             outputBox.AppendText(Environment.NewLine);
-
+            foreach (var s in outp)
+            {
+                outputBox.AppendText(s);
+                outputBox.AppendText(Environment.NewLine);
+            }
+            }
+            else
+            {
+                outputBox.AppendText("Нельзя");
+                outputBox.AppendText(Environment.NewLine);
+            }
 
         }
+
+        private bool Recursion(string fact, ref HashSet<string> inventory, ref HashSet<String> colors, ref List<string> outp)
+        {
+            colors.Add(fact);
+            outp.Add($"Хотим получить: {fact} ({facts[fact]})");
+
+            if (!facts_to_rules.ContainsKey(fact))
+            {
+                if (!inventory.Contains(fact))
+                {
+                    return false;
+                }
+                outp.Add("А для его вывода никаких правил и не надо");
+                return true;
+            }
+
+            var ruleID = facts_to_rules[fact];
+            var rule = rules[ruleID];
+            outp.Add($"Понадобится правило: {rule}");
+            List<string>precond = new();
+            bool all = true;
+            foreach (var p in rule.preconds)
+            {
+                if (!inventory.Contains(p))
+                {
+                    precond.Add(p);
+                }
+
+            }
+            if (precond.Count == 0) return true;
+
+            outp.Add($"Для работы этого правила нужны ещё факты: {string.Join(", ", precond)}");
+            bool answer = true;
+            foreach (var factCond in precond)
+            {
+                if (colors.Contains(factCond))
+                {
+                    outp.Add($"Факт {factCond} ({facts[fact]}) мы уже получили ранее (надеюсь)");
+                    
+                    continue;
+                }
+                answer &= Recursion(factCond, ref inventory, ref colors, ref outp);
+            }
+            return answer;
+        }
+
         /// <summary>
         /// Возвращает список фактов, которые нужны для выполнения правила, возвращающего предоставленный факт
         /// </summary>
@@ -218,6 +262,16 @@ namespace ISTER
         }
 
         private void ruleBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ruleBox_MouseDoubleClick(object sender, MouseEventArgs e)
         {
 
         }

@@ -36,9 +36,11 @@
             this.label4 = new System.Windows.Forms.Label();
             this.rulesFromFactsButton = new System.Windows.Forms.Button();
             this.factsFromRuleButton = new System.Windows.Forms.Button();
-            this.chosenBox = new System.Windows.Forms.ListBox();
+            this.chosenFactsBox = new System.Windows.Forms.ListBox();
             this.factsBox = new System.Windows.Forms.ListBox();
             this.clearChosenButton = new System.Windows.Forms.Button();
+            this.chosenRuleBox = new System.Windows.Forms.ListBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -86,6 +88,7 @@
             this.ruleBox.Size = new System.Drawing.Size(232, 204);
             this.ruleBox.TabIndex = 6;
             this.ruleBox.SelectedIndexChanged += new System.EventHandler(this.ruleBox_SelectedIndexChanged);
+            this.ruleBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.ruleBox_MouseDoubleClick);
             // 
             // label4
             // 
@@ -98,7 +101,7 @@
             // 
             // rulesFromFactsButton
             // 
-            this.rulesFromFactsButton.Location = new System.Drawing.Point(816, 51);
+            this.rulesFromFactsButton.Location = new System.Drawing.Point(1043, 51);
             this.rulesFromFactsButton.Name = "rulesFromFactsButton";
             this.rulesFromFactsButton.Size = new System.Drawing.Size(283, 224);
             this.rulesFromFactsButton.TabIndex = 8;
@@ -108,7 +111,7 @@
             // 
             // factsFromRuleButton
             // 
-            this.factsFromRuleButton.Location = new System.Drawing.Point(829, 341);
+            this.factsFromRuleButton.Location = new System.Drawing.Point(1043, 336);
             this.factsFromRuleButton.Name = "factsFromRuleButton";
             this.factsFromRuleButton.Size = new System.Drawing.Size(270, 208);
             this.factsFromRuleButton.TabIndex = 9;
@@ -116,16 +119,16 @@
             this.factsFromRuleButton.UseVisualStyleBackColor = true;
             this.factsFromRuleButton.Click += new System.EventHandler(this.factsFromRuleButton_Click);
             // 
-            // chosenBox
+            // chosenFactsBox
             // 
-            this.chosenBox.FormattingEnabled = true;
-            this.chosenBox.ItemHeight = 20;
-            this.chosenBox.Location = new System.Drawing.Point(264, 340);
-            this.chosenBox.Name = "chosenBox";
-            this.chosenBox.Size = new System.Drawing.Size(504, 204);
-            this.chosenBox.TabIndex = 10;
-            this.chosenBox.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
-            this.chosenBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox2_MouseDoubleClick);
+            this.chosenFactsBox.FormattingEnabled = true;
+            this.chosenFactsBox.ItemHeight = 20;
+            this.chosenFactsBox.Location = new System.Drawing.Point(264, 340);
+            this.chosenFactsBox.Name = "chosenFactsBox";
+            this.chosenFactsBox.Size = new System.Drawing.Size(284, 204);
+            this.chosenFactsBox.TabIndex = 10;
+            this.chosenFactsBox.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
+            this.chosenFactsBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox2_MouseDoubleClick);
             // 
             // factsBox
             // 
@@ -148,14 +151,35 @@
             this.clearChosenButton.UseVisualStyleBackColor = true;
             this.clearChosenButton.Click += new System.EventHandler(this.clearChosenButton_Click);
             // 
+            // chosenRuleBox
+            // 
+            this.chosenRuleBox.FormattingEnabled = true;
+            this.chosenRuleBox.ItemHeight = 20;
+            this.chosenRuleBox.Location = new System.Drawing.Point(597, 340);
+            this.chosenRuleBox.Name = "chosenRuleBox";
+            this.chosenRuleBox.Size = new System.Drawing.Size(342, 204);
+            this.chosenRuleBox.TabIndex = 13;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(597, 317);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(138, 20);
+            this.label5.TabIndex = 14;
+            this.label5.Text = "Выбранные факты";
+            this.label5.Click += new System.EventHandler(this.label5_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1359, 615);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.chosenRuleBox);
             this.Controls.Add(this.clearChosenButton);
             this.Controls.Add(this.factsBox);
-            this.Controls.Add(this.chosenBox);
+            this.Controls.Add(this.chosenFactsBox);
             this.Controls.Add(this.factsFromRuleButton);
             this.Controls.Add(this.rulesFromFactsButton);
             this.Controls.Add(this.label4);
@@ -180,8 +204,10 @@
         private Label label4;
         private Button rulesFromFactsButton;
         private Button factsFromRuleButton;
-        private ListBox chosenBox;
+        private ListBox chosenFactsBox;
         private ListBox factsBox;
         private Button clearChosenButton;
+        private ListBox chosenRuleBox;
+        private Label label5;
     }
 }

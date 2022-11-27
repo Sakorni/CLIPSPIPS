@@ -1,12 +1,16 @@
+using CLIPSNET;
+
 namespace ISTER
 {
     public partial class Form1 : Form
     {
+        private CLIPSNET.Environment clips = new CLIPSNET.Environment();
+
         public static SortedDictionary<string, string> facts = new();
         /// <summary>
-        /// ключ - id факта, значение - id правила
+        /// пїЅпїЅпїЅпїЅ - id пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - id пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         /// </summary>
-        public static SortedDictionary<string, string> facts_to_rules = new(); 
+        public static SortedDictionary<string, string> facts_to_rules = new();
         private static Dictionary<string, Rule> rules = new();
         private static HashSet<string> chosen_facts = new();
         //
@@ -20,21 +24,21 @@ namespace ISTER
         }
 
         /// <summary>
-        /// Загрузить факты в списки
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         /// </summary>
         private void load()
         {
             foreach (var item in facts.Keys)
             {
-                    factsBox.Items.Add( $"{item}: {facts[item]}");
+                factsBox.Items.Add($"{item}: {facts[item]}");
             }
-            foreach(var item in facts_to_rules.Keys)
+            foreach (var item in facts_to_rules.Keys)
             {
                 ruleBox.Items.Add($"{item}: {facts[item]}");
             }
         }
         /// <summary>
-        /// Считывает факты из файла.
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
@@ -44,15 +48,17 @@ namespace ISTER
             foreach (string line in File.ReadAllLines(path))
             {
                 if (line.StartsWith("//")) continue;
-                try {
+                try
+                {
                     var t = line.Split("#");
                     res.Add(t[0].Trim(), t[1].Trim());
-                } catch { }
+                }
+                catch { }
             }
             return res;
         }
         /// <summary>
-        /// Считывает из файла правила, также заполняет facts_to_rules.
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ facts_to_rules.
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
@@ -122,7 +128,7 @@ namespace ISTER
             var selected_rule = ruleBox.SelectedItem;
             if (chosen_facts.Count == 0 || selected_rule == null)
             {
-                outputBox.AppendText("Ой, а ничего не выбрали, с чем мне работать-то?");
+                outputBox.AppendText("пїЅпїЅ, пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ-пїЅпїЅ?");
                 return;
             };
 
@@ -134,7 +140,7 @@ namespace ISTER
             while (rerun)
             {
                 rerun = false;
-                foreach(var rule in possibleRules)
+                foreach (var rule in possibleRules)
                 {
                     if (rule.compare(chosen_facts.ToList()))
                     {
@@ -149,16 +155,16 @@ namespace ISTER
                         }
                         rerun = true;
                     }
-                    
+
                 }
             }
             if (!found)
             {
-                outputBox.AppendText("Нельзя");
+                outputBox.AppendText("пїЅпїЅпїЅпїЅпїЅпїЅ");
                 return;
             }
 
-            outputBox.AppendText("Льзя");
+            outputBox.AppendText("пїЅпїЅпїЅпїЅ");
             foreach (var s in output)
             {
                 outputBox.AppendText(s);
@@ -189,29 +195,30 @@ namespace ISTER
             HashSet<string> inventory = chosen_facts;
             HashSet<string> colors = new();
             List<string> outp = new();
-            bool answer = Recursion(firstFact, ref inventory, ref colors, ref outp);
+            bool answer = Recursion(firstFact, ref inventory, colors, ref outp);
             if (answer)
             {
-            outputBox.AppendText("Можно");
-            outputBox.AppendText(Environment.NewLine);
-            foreach (var s in outp)
-            {
-                outputBox.AppendText(s);
+                outputBox.AppendText("пїЅпїЅпїЅпїЅпїЅ");
                 outputBox.AppendText(Environment.NewLine);
-            }
+                foreach (var s in outp)
+                {
+                    outputBox.AppendText(s);
+                    outputBox.AppendText(Environment.NewLine);
+                }
             }
             else
             {
-                outputBox.AppendText("Нельзя");
+                outputBox.AppendText("пїЅпїЅпїЅпїЅпїЅпїЅ");
                 outputBox.AppendText(Environment.NewLine);
             }
 
         }
 
-        private bool Recursion(string fact, ref HashSet<string> inventory, ref HashSet<String> colors, ref List<string> outp)
+        private bool Recursion(string fact, HashSet<string> inventory, HashSet<String> colors, List<string> outp, int offset = 0)
         {
+            var offse_str = new String('|', offset);
             colors.Add(fact);
-            outp.Add($"Хотим получить: {fact} ({facts[fact]})");
+            outp.Add($"{offse_str} пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: {fact} ({facts[fact]})");
 
             if (!facts_to_rules.ContainsKey(fact))
             {
@@ -219,21 +226,25 @@ namespace ISTER
                 {
                     return false;
                 }
-                outp.Add("А для его вывода никаких правил и не надо");
+                outp.Add($"{offse_str} пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ");
                 return true;
             }
 
             var ruleID = facts_to_rules[fact];
             var rule = rules[ruleID];
-            outp.Add($"Понадобится правило: {rule}");
-            List<string>precond = new();
+            outp.Add($"{offse_str} пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ: {rule}");
+            List<string> precond = new();
             bool all = true;
-            outp.Add($"Для работы этого правила нужны факты: {string.Join(", ", rule.preconds)}");
+            outp.Add($"{offse_str} пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ: {string.Join(", ", rule.preconds)}");
             foreach (var p in rule.preconds)
             {
                 if (!inventory.Contains(p))
                 {
                     precond.Add(p);
+                }
+                else
+                {
+                    outp.Add($"{p} ({facts[p]}) пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
                 }
 
             }
@@ -244,17 +255,18 @@ namespace ISTER
             {
                 if (colors.Contains(factCond))
                 {
-                    outp.Add($"Факт {factCond} ({facts[fact]}) мы уже получили ранее (надеюсь)");
-                    
+                    outp.Add($"{offse_str} пїЅпїЅпїЅпїЅ {factCond} ({facts[fact]}) пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅ)");
+
                     continue;
                 }
-                answer &= Recursion(factCond, ref inventory, ref colors, ref outp);
+                answer &= Recursion(factCond, ref inventory, colors, ref outp, offset + 1);
+                if (!answer) return false;
             }
             return answer;
         }
 
         /// <summary>
-        /// Возвращает список фактов, которые нужны для выполнения правила, возвращающего предоставленный факт
+        /// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
         /// </summary>
         /// <param name="fact"></param>
         /// <returns></returns>

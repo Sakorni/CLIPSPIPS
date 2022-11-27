@@ -27,6 +27,10 @@ namespace ISTER
         {
             return $"{Name}: {String.Join(", ", preconds.ToArray())} -> {conseq} ({readable_form})";
         }
+        public bool Equals(Rule other)
+        {
+            return Name == other.Name;
+        }
 
         /// <summary>
         /// Проверяет, что все посылки правила присутствуют в списке заданных фактов

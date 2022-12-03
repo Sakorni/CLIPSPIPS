@@ -495,7 +495,8 @@ Class CLIPSNET.Environment: AutoLayout, AnsiClass, Class, Public, BeforeFieldIni
     CommandLoopOnceThenBatch(): PrivateScope, Public, HideBySig
     PrintBanner(): PrivateScope, Public, HideBySig
     PrintPrompt(): PrivateScope, Public, HideBySig
-    GetFactScopes(): PrivateScope, Public, HideBySig
+    
+    copes(): PrivateScope, Public, HideBySig
     GetFactList(): PrivateScope, Public, HideBySig
     GetInstanceScopes(): PrivateScope, Public, HideBySig
     GetInstanceList(): PrivateScope, Public, HideBySig

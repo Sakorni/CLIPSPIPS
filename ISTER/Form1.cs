@@ -1,4 +1,5 @@
 using CLIPSNET;
+using System.Windows.Forms;
 
 namespace ISTER
 {
@@ -18,15 +19,79 @@ namespace ISTER
         public Form1()
         {
             InitializeComponent();
-            facts = Get_facts("../../../facts.txt");
-            rules = Get_rules("../../../rules.txt");
+            facts = Get_facts("../../../../facts.txt");
+            rules = Get_rules("../../../../rules.txt");
             load();
+            InitClips();
         }
 
-        /// <summary>
-        /// ��������� ����� � ������
-        /// </summary>
-        private void load()
+        private void InitClips()
+        {
+            string clp = System.IO.File.ReadAllText("../../../../rules.clp");
+            clips.LoadFromString(clp);
+
+        }
+
+        private void NewRecognPhrases(List<FactInstance> phrases)
+        {
+            Dialog dialog = new Dialog(phrases);
+            var res = dialog.ShowDialog();
+            if (res == DialogResult.OK)
+            {
+                //  var ind = dialog.SelectedInd;
+                //  string factVal = $"item (name {phrases[ind].GetSlotValues()[0].Contents.Replace("\"", "").Replace("(", "").Replace(")", "")})";
+                //clips.Eval($"(assert ({factVal}))");
+              //   richTextBox1.Text += "Revieved fact " + phrases[ind].GetSlotValues()[0].ToString().Split(',')[1].Replace(")", "") + "\n";
+                /*clips.Run();
+                HandleResponse();*/
+            }
+            else if (res == DialogResult.Cancel)
+            {
+                //   var ind = dialog.SelectedInd;
+                //   var phrase = phrases[ind].GetSlotValues()[0].ToString();
+                // richTextBox1.Text += "Выведен факт " + phrase.Replace(")", "").Replace("(", "") + "\n";
+                clips.Eval("(assert (clearmessage))");
+                /*                clips.Run();
+                                HandleResponse();*/
+            }
+        }
+
+        private void HandleResponse()
+        {
+            clips.Run();
+            //  Вытаскиаваем факт из ЭС
+            var fs = clips.GetFactList();
+            var readyFacts = fs.Where(f => f.RelationName == "sendmessagehalt").ToList();
+            if (readyFacts.Count > 0)
+            {
+                NewRecognPhrases(readyFacts);
+            }
+            else
+            {
+                // richTextBox1.Text += "Подходящих вариантов нет\n";
+                // button2.Enabled = false;
+            }
+            clips.Eval("(assert (clear-message))");
+        }
+
+        private void ForwardConclusion()
+        {
+            clips.Clear();
+            InitClips();
+
+            foreach (var f in chosen_facts)
+            {
+                string factVal = $"item (id {f})";
+                clips.Eval($"(assert ({factVal}) )");
+                // richTextBox1.Text += "Добавлен факт " + f.description + "\n";
+            }
+        }
+
+
+            /// <summary>
+            /// ��������� ����� � ������
+            /// </summary>
+            private void load()
         {
             foreach (var item in facts.Keys)
             {
@@ -128,14 +193,16 @@ namespace ISTER
             var selected_rule = ruleBox.SelectedItem;
             if (chosen_facts.Count == 0 || selected_rule == null)
             {
-                outputBox.AppendText("��, � ������ �� �������, � ��� ��� ��������-��?");
+                outputBox.AppendText("No fact, no rule, ok?");
                 return;
             };
 
             var rerun = true;
             var found = false;
             var possibleRules = rules.Values.ToHashSet();
-            var looking_for = selected_rule.ToString().Split(":")[0].Trim();
+            var looking_for = selected_rule.ToString()
+                .Split(":")[0]
+                .Trim();
             List<string> output = new();
             while (rerun)
             {
@@ -160,15 +227,15 @@ namespace ISTER
             }
             if (!found)
             {
-                outputBox.AppendText("������");
+                outputBox.AppendText("Not found m8");
                 return;
             }
 
-            outputBox.AppendText("����");
+            outputBox.AppendText("I have found this");
             foreach (var s in output)
             {
                 outputBox.AppendText(s);
-                outputBox.AppendText(Environment.NewLine);
+                outputBox.AppendText(System.Environment.NewLine);
             }
         }
 
@@ -195,21 +262,21 @@ namespace ISTER
             HashSet<string> inventory = chosen_facts;
             HashSet<string> colors = new();
             List<string> outp = new();
-            bool answer = Recursion(firstFact, ref inventory, colors, ref outp);
+            bool answer = Recursion(firstFact, inventory, colors, outp);
             if (answer)
             {
                 outputBox.AppendText("�����");
-                outputBox.AppendText(Environment.NewLine);
+                outputBox.AppendText(System.Environment.NewLine);
                 foreach (var s in outp)
                 {
                     outputBox.AppendText(s);
-                    outputBox.AppendText(Environment.NewLine);
+                    outputBox.AppendText(System.Environment.NewLine);
                 }
             }
             else
             {
                 outputBox.AppendText("������");
-                outputBox.AppendText(Environment.NewLine);
+                outputBox.AppendText(System.Environment.NewLine);
             }
 
         }
@@ -218,7 +285,7 @@ namespace ISTER
         {
             var offse_str = new String('|', offset);
             colors.Add(fact);
-            outp.Add($"{offse_str} ����� ��������: {fact} ({facts[fact]})");
+            outp.Add($"{offse_str} Looking for a: {fact} ({facts[fact]})");
 
             if (!facts_to_rules.ContainsKey(fact))
             {
@@ -226,16 +293,16 @@ namespace ISTER
                 {
                     return false;
                 }
-                outp.Add($"{offse_str} � ��� ��� ������ ������� ������ � �� ����");
+                outp.Add($"{offse_str} It's in the bag");
                 return true;
             }
 
             var ruleID = facts_to_rules[fact];
             var rule = rules[ruleID];
-            outp.Add($"{offse_str} ����������� �������: {rule}");
+            outp.Add($"{offse_str} Going to use rule: {rule}");
             List<string> precond = new();
             bool all = true;
-            outp.Add($"{offse_str} ��� ������ ����� ������� ����� �����: {string.Join(", ", rule.preconds)}");
+            outp.Add($"{offse_str} We are need to achieve: {string.Join(", ", rule.preconds)}");
             foreach (var p in rule.preconds)
             {
                 if (!inventory.Contains(p))
@@ -244,7 +311,7 @@ namespace ISTER
                 }
                 else
                 {
-                    outp.Add($"{p} ({facts[p]}) ��� � ���������");
+                    outp.Add($"{p} ({facts[p]}) It's in the bag!");
                 }
 
             }
@@ -255,18 +322,18 @@ namespace ISTER
             {
                 if (colors.Contains(factCond))
                 {
-                    outp.Add($"{offse_str} ���� {factCond} ({facts[fact]}) �� ��� �������� ����� (�������)");
+                    outp.Add($"{offse_str} ���� {factCond} ({facts[fact]}) It's gray or black. Be careful");
 
                     continue;
                 }
-                answer &= Recursion(factCond, ref inventory, colors, ref outp, offset + 1);
+                answer &= Recursion(factCond, inventory, colors, outp, offset + 1);
                 if (!answer) return false;
             }
             return answer;
         }
 
         /// <summary>
-        /// ���������� ������ ������, ������� ����� ��� ���������� �������, ������������� ��������������� ����
+        /// Literally
         /// </summary>
         /// <param name="fact"></param>
         /// <returns></returns>

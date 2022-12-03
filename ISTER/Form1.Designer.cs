@@ -123,7 +123,7 @@
             // 
             this.chosenFactsBox.FormattingEnabled = true;
             this.chosenFactsBox.ItemHeight = 20;
-            this.chosenFactsBox.Location = new System.Drawing.Point(264, 340);
+            this.chosenFactsBox.Location = new System.Drawing.Point(264, 341);
             this.chosenFactsBox.Name = "chosenFactsBox";
             this.chosenFactsBox.Size = new System.Drawing.Size(284, 204);
             this.chosenFactsBox.TabIndex = 10;

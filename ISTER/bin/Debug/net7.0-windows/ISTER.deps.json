@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v7.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v7.0": {
+      "ISTER/1.0.0": {
+        "dependencies": {
+          "CLIPSCLRWrapper": "1.0.6893.855"
+        },
+        "runtime": {
+          "ISTER.dll": {}
+        }
+      },
+      "CLIPSCLRWrapper/1.0.6893.855": {
+        "runtime": {
+          "CLIPSCLRWrapper.dll": {
+            "assemblyVersion": "1.0.6893.855",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "ISTER/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "CLIPSCLRWrapper/1.0.6893.855": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

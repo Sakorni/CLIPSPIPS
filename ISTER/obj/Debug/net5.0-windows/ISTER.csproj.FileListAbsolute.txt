@@ -1,0 +1,8 @@
+C:\Users\ssako\source\repos\ISTER\ISTER\obj\Debug\net5.0-windows\ISTER.csproj.AssemblyReference.cache
+C:\Users\ssako\source\repos\ISTER\ISTER\obj\Debug\net5.0-windows\ISTER.Dialog.resources
+C:\Users\ssako\source\repos\ISTER\ISTER\obj\Debug\net5.0-windows\ISTER.Form1.resources
+C:\Users\ssako\source\repos\ISTER\ISTER\obj\Debug\net5.0-windows\ISTER.csproj.GenerateResource.cache
+C:\Users\ssako\source\repos\ISTER\ISTER\obj\Debug\net5.0-windows\ISTER.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ssako\source\repos\ISTER\ISTER\obj\Debug\net5.0-windows\ISTER.AssemblyInfoInputs.cache
+C:\Users\ssako\source\repos\ISTER\ISTER\obj\Debug\net5.0-windows\ISTER.AssemblyInfo.cs
+C:\Users\ssako\source\repos\ISTER\ISTER\obj\Debug\net5.0-windows\ISTER.csproj.CoreCompileInputs.cache

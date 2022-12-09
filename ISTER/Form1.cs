@@ -1,3 +1,5 @@
+using System.Data;
+
 namespace ISTER
 {
     public partial class Form1 : Form
@@ -124,31 +126,47 @@ namespace ISTER
         private void button1_Click(object sender, EventArgs e)
         {
             outputBox.Clear();
-            if (chosen_facts.Count == 0)
+            var selectedRule = ruleBox.SelectedItem;
+            if (chosen_facts.Count == 0 || selectedRule == null)
             {
-                outputBox.AppendText("Ой, а ничего не выбрали, с чем мне работать-то?");
+                outputBox.AppendText("Что-то было не выбрано");
                 return;
             };
-            var rerun = true;
-            var possibleRules = rules.Values.ToHashSet();
-            while (rerun)
+            var end = false;
+            var openRules = rules.Values.ToHashSet();
+            var required = selectedRule.ToString()!.Split(":")[0].Trim();
+            var was_found = false;
+            List<string> outStr = new();
+            while (!end)
             {
-                rerun = false;
-                foreach(var rule in possibleRules)
+                end = true;
+                foreach(var oRule in openRules)
                 {
-                    if (rule.compare(chosen_facts.ToList()))
+                    if (oRule.compare(chosen_facts.ToList()))
                     {
-                        chosen_facts.Add(rule.conseq);
-                        outputBox.AppendText(rule.ToString());
-                        outputBox.AppendText(Environment.NewLine);
-                        possibleRules.Remove(rule);
-                        rerun = true;
+                        chosen_facts.Add(oRule.conseq);
+                        outStr.Add(oRule.ToString());
+                        openRules.Remove(oRule);
+                        if(oRule.conseq == required)
+                        {
+                            end = true;
+                            was_found = true;
+                            break;
+                        }
+                        end = false;
                     }
                 }
             }
-            if(outputBox.Text.Length == 0)
+            if (!was_found)
             {
-                outputBox.AppendText("Не, бро, сорян, из этого вообще ничего не сварить");
+                outputBox.AppendText("Вывод факта не существует");
+            }
+            outputBox.AppendText("Вывод:");
+            outputBox.AppendText(Environment.NewLine);
+            foreach (var str in outStr)
+            {
+                outputBox.AppendText(str);
+                outputBox.AppendText(Environment.NewLine);
             }
         }
 
@@ -174,32 +192,33 @@ namespace ISTER
         private void factsFromRuleButton_Click(object sender, EventArgs e)
         {
             outputBox.Clear();
-            var item = ruleBox.SelectedItem;
-            if (item == null)
+            if (chosen_facts.Count == 0 || ruleBox.SelectedItem == null)
             {
-                outputBox.AppendText("Nothing to write home about m8");
+                outputBox.AppendText("Что-то было не выбрано");
                 return;
-            }
+            };
 
-            var firstFact = item.ToString().Split(":")[0].Trim();
+            var item = ruleBox.SelectedItem.ToString();
 
-            HashSet<string> colors = new();
+            HashSet<string> inventory = chosen_facts;
+            HashSet<string> visited = new();
             Stack<string> s = new();
             
-            s.Push(firstFact);
+            var ffact = item!.Split(":")[0].Trim();
+            s.Push(ffact);
             while(s.Count > 0)
             {
                 outputBox.AppendText("------------------");
                 outputBox.AppendText(Environment.NewLine);
                 var fact = s.Pop();
-                colors.Add(fact);
+                visited.Add(fact);
                 outputBox.AppendText($"Хотим получить: {fact} ({facts[fact]})");
                 outputBox.AppendText(Environment.NewLine);
 
-                var precs = facts_tree[fact];
-                if (precs == null)
+                var missing_precs = facts_tree[fact];
+                if (missing_precs == null)
                 {
-                    outputBox.AppendText("А для его вывода никаких правил и не надо");
+                    outputBox.AppendText("Для вывода правила не нужны факты");
                     outputBox.AppendText(Environment.NewLine);
                     continue;
                 }
@@ -211,18 +230,22 @@ namespace ISTER
                 outputBox.AppendText(Environment.NewLine);
                 */
 
-                outputBox.AppendText($"Для получения этого факта нам нужны факты: {string.Join(", ",precs)}");
+                outputBox.AppendText($"Для получения этого факта нам нужны факты: {string.Join(", ",missing_precs)}");
                 outputBox.AppendText(Environment.NewLine);
 
-                foreach(var factCond in precs)
+                foreach(var prec in missing_precs)
                 {
-                    if (colors.Contains(factCond))
+                    if (inventory.Contains(prec))
                     {
-                        outputBox.AppendText($"Факт {factCond} ({facts[factCond]}) мы уже получили ранее (надеюсь)");
+
+                    }
+                    if (visited.Contains(prec))
+                    {
+                        outputBox.AppendText($"Факт {prec} ({facts[prec]}) мы уже получили ранее (надеюсь)");
                         outputBox.AppendText(Environment.NewLine);
                         continue;
                     }
-                    s.Push(factCond);
+                    s.Push(prec);
                 }
             }
             outputBox.AppendText("Ну вот и всё! Террария - это просто!");

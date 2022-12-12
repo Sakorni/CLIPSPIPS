@@ -1,15 +1,16 @@
 using System.Data;
+using System.Linq;
 
 namespace ISTER
 {
     public partial class Form1 : Form
     {
-        public static SortedDictionary<string, string> facts = new();
+        public static Dictionary<string, string> facts = new();
         /// <summary>
         /// ключ - id факта, значение - id правила
         /// </summary>
-        public static SortedDictionary<string, string> facts_to_rules = new(); 
-        private static Dictionary<string, Rule> rules = new();
+        public static Dictionary<string, List<string>> facts_to_rules = new(); 
+        private static Dictionary<string, List<Rule>> rules = new();
         private static HashSet<string> chosen_facts = new();
         /// <summary>
         /// Ключ - факт, значение - какие факты нужны для получения этого факта
@@ -45,9 +46,9 @@ namespace ISTER
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private SortedDictionary<string, string> Get_facts(string path)
+        private Dictionary<string, string> Get_facts(string path)
         {
-            SortedDictionary<string, string> res = new SortedDictionary<string, string>();
+            Dictionary<string, string> res = new Dictionary<string, string>();
             foreach (string line in File.ReadAllLines(path))
             {
                 if (line.StartsWith("//")) continue;
@@ -63,17 +64,26 @@ namespace ISTER
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private Dictionary<string, Rule> Get_rules(string path)
+        private Dictionary<string, List<Rule>> Get_rules(string path)
         {
-            Dictionary<string, Rule> res = new();
+            Dictionary<string, List<Rule>> res = new();
             foreach (string line in File.ReadAllLines(path))
             {
                 if (line.StartsWith("//")) continue;
                 try
                 {
                     var r = new Rule(line);
-                    res.Add(r.Name, r);
-                    facts_to_rules.Add(r.conseq, r.Name);
+                    if (!res.ContainsKey(r.Name))
+                    {
+                        res.Add(r.Name, new List<Rule>());
+                    }
+                    res[r.Name].Add(r);
+
+                    if (!facts_to_rules.ContainsKey(r.conseq))
+                    {
+                        facts_to_rules.Add(r.conseq, new List<string>());
+                    }
+                    facts_to_rules[r.conseq].Add(r.Name);
                 }
                 catch { }
             }
@@ -133,33 +143,43 @@ namespace ISTER
                 return;
             };
             var end = false;
-            var openRules = rules.Values.ToHashSet();
             var required = selectedRule.ToString()!.Split(":")[0].Trim();
             var was_found = false;
+            HashSet<string> inventory = chosen_facts;
+            var openRuleNames = facts_to_rules.Where(x => inventory.Contains(x.Key)).Select(x => x.Value)
+            .Aggregate<List<string>>((x,y) => {
+                x.AddRange(y);
+                return x;
+            });
+            var openRules = rules.Where(x => openRuleNames.Contains(x.Key)).Select(x => x.Value).ToHashSet();
             List<string> outStr = new();
             while (!end)
             {
                 end = true;
                 foreach(var oRule in openRules)
                 {
-                    if (oRule.compare(chosen_facts.ToList()))
+                    foreach (var r in oRule)
                     {
-                        chosen_facts.Add(oRule.conseq);
-                        outStr.Add(oRule.ToString());
-                        openRules.Remove(oRule);
-                        if(oRule.conseq == required)
+                        if (r.compare(chosen_facts.ToList()))
                         {
-                            end = true;
-                            was_found = true;
-                            break;
+                            chosen_facts.Add(r.conseq);
+                            outStr.Add(r.ToString());
+                            if (r.conseq == required)
+                            {
+                                end = true;
+                                was_found = true;
+                                break;
+                            }
+                            end = false;
                         }
-                        end = false;
+                        openRules.Remove(oRule);
                     }
                 }
             }
             if (!was_found)
             {
                 outputBox.AppendText("Вывод факта не существует");
+                return;
             }
             outputBox.AppendText("Вывод:");
             outputBox.AppendText(Environment.NewLine);
@@ -203,53 +223,66 @@ namespace ISTER
             HashSet<string> inventory = chosen_facts;
             HashSet<string> visited = new();
             Stack<string> s = new();
-            
+            Stack<List<string>> output = new();
+            bool can_create = true;
+
             var ffact = item!.Split(":")[0].Trim();
             s.Push(ffact);
             while(s.Count > 0)
             {
-                outputBox.AppendText("------------------");
-                outputBox.AppendText(Environment.NewLine);
+                List<string> factOut = new();
                 var fact = s.Pop();
+                if (visited.Contains(fact))
+                {
+                    continue;
+                }
                 visited.Add(fact);
-                outputBox.AppendText($"Хотим получить: {fact} ({facts[fact]})");
-                outputBox.AppendText(Environment.NewLine);
+                factOut.Add($"Необходим факт {fact} \"{facts[fact]}\"");
 
                 var missing_precs = facts_tree[fact];
                 if (missing_precs == null)
                 {
-                    outputBox.AppendText("Для вывода правила не нужны факты");
-                    outputBox.AppendText(Environment.NewLine);
-                    continue;
+                    factOut.Add("Для вывода факта ничего не требуется, однако он отсутствует в инвентаре");
+                    can_create = false;
+                    break;
                 }
                 
-                /*
-                var ruleID = facts_to_rules[fact];
-                var rule = rules[ruleID];
-                outputBox.AppendText($"Понадобится правило: {rule}"); // TODO: можешь избавиться от правил, тогда использование дерева будет более оправданным, но не будешь говорить, какие факты нужны
-                outputBox.AppendText(Environment.NewLine);
-                */
+                var rule = rules[facts_to_rules[fact]];
+                factOut.Add($"Для него нужно правило {rule}");
 
-                outputBox.AppendText($"Для получения этого факта нам нужны факты: {string.Join(", ",missing_precs)}");
-                outputBox.AppendText(Environment.NewLine);
+                factOut.Add($"Для правила необходимы факты: {string.Join(", ",missing_precs)}");
 
                 foreach(var prec in missing_precs)
                 {
                     if (inventory.Contains(prec))
                     {
-
+                        factOut.Add($"Факт {prec} содержится в инвентаре");
+                        continue;
                     }
                     if (visited.Contains(prec))
                     {
-                        outputBox.AppendText($"Факт {prec} ({facts[prec]}) мы уже получили ранее (надеюсь)");
-                        outputBox.AppendText(Environment.NewLine);
+                        factOut.Add($"Факт {prec} \"{facts[prec]}\" был получен ранее (либо выводится)");
                         continue;
                     }
                     s.Push(prec);
                 }
+                output.Push(factOut);
             }
-            outputBox.AppendText("Ну вот и всё! Террария - это просто!");
-            outputBox.AppendText(Environment.NewLine);
+            if (!can_create)
+            {
+                outputBox.AppendText("Вывод невозможен");
+                return;
+            }
+            foreach(var strLst in output)
+            {
+                foreach (var str in strLst)
+                {
+                    outputBox.AppendText(str);
+                    outputBox.AppendText(Environment.NewLine);
+                }
+                outputBox.AppendText("------------");
+                outputBox.AppendText(Environment.NewLine);
+            }
 
 
         }

@@ -1,5 +1,5 @@
 using System.Data;
-using System.Linq;
+using System.Diagnostics;
 
 namespace ISTER
 {
@@ -9,8 +9,8 @@ namespace ISTER
         /// <summary>
         /// ключ - id факта, значение - id правила
         /// </summary>
-        public static Dictionary<string, List<string>> facts_to_rules = new(); 
-        private static Dictionary<string, List<Rule>> rules = new();
+        public static Dictionary<string, string> facts_to_rules = new(); 
+        private static Dictionary<string, Rule> rules = new();
         private static HashSet<string> chosen_facts = new();
         /// <summary>
         /// Ключ - факт, значение - какие факты нужны для получения этого факта
@@ -64,26 +64,17 @@ namespace ISTER
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private Dictionary<string, List<Rule>> Get_rules(string path)
+        private Dictionary<string, Rule> Get_rules(string path)
         {
-            Dictionary<string, List<Rule>> res = new();
+            Dictionary<string, Rule> res = new();
             foreach (string line in File.ReadAllLines(path))
             {
                 if (line.StartsWith("//")) continue;
                 try
                 {
                     var r = new Rule(line);
-                    if (!res.ContainsKey(r.Name))
-                    {
-                        res.Add(r.Name, new List<Rule>());
-                    }
-                    res[r.Name].Add(r);
-
-                    if (!facts_to_rules.ContainsKey(r.conseq))
-                    {
-                        facts_to_rules.Add(r.conseq, new List<string>());
-                    }
-                    facts_to_rules[r.conseq].Add(r.Name);
+                    res.Add(r.Name, r);
+                    facts_to_rules.Add(r.conseq, r.Name);
                 }
                 catch { }
             }
@@ -146,33 +137,25 @@ namespace ISTER
             var required = selectedRule.ToString()!.Split(":")[0].Trim();
             var was_found = false;
             HashSet<string> inventory = chosen_facts;
-            var openRuleNames = facts_to_rules.Where(x => inventory.Contains(x.Key)).Select(x => x.Value)
-            .Aggregate<List<string>>((x,y) => {
-                x.AddRange(y);
-                return x;
-            });
-            var openRules = rules.Where(x => openRuleNames.Contains(x.Key)).Select(x => x.Value).ToHashSet();
+            var openRules = rules.Values.ToHashSet();
             List<string> outStr = new();
             while (!end)
             {
                 end = true;
                 foreach(var oRule in openRules)
                 {
-                    foreach (var r in oRule)
+                    if (oRule.compare(inventory.ToList()))
                     {
-                        if (r.compare(chosen_facts.ToList()))
-                        {
-                            chosen_facts.Add(r.conseq);
-                            outStr.Add(r.ToString());
-                            if (r.conseq == required)
-                            {
-                                end = true;
-                                was_found = true;
-                                break;
-                            }
-                            end = false;
-                        }
+                        inventory.Add(oRule.conseq);
+                        outStr.Add(oRule.ToString());
                         openRules.Remove(oRule);
+                        if(oRule.conseq == required)
+                        {
+                            end = true;
+                            was_found = true;
+                            break;
+                        }
+                        end = false;
                     }
                 }
             }
@@ -208,7 +191,31 @@ namespace ISTER
                 facts_tree.Add(fact, preconditions);
             }
         }
-
+        private void clear_process(string prec, 
+            ref Dictionary<string, List<string>> in_process,
+            ref HashSet<string> visited)
+        {
+            Queue<string> q = new();
+            q.Enqueue(prec);
+            while(q.Count > 0)
+            {
+                var p = q.Dequeue();
+                foreach (var proc in in_process)
+                {
+                    if (proc.Value.Contains(p))
+                    {
+                        proc.Value.Remove(p);
+                        if (proc.Value.Count == 0)
+                        {
+                            in_process.Remove(proc.Key);
+                            visited.Add(proc.Key);
+                            q.Enqueue(proc.Key);
+                        }
+                    }
+                }
+            }
+            
+        }
         private void factsFromRuleButton_Click(object sender, EventArgs e)
         {
             outputBox.Clear();
@@ -222,12 +229,14 @@ namespace ISTER
 
             HashSet<string> inventory = chosen_facts;
             HashSet<string> visited = new();
+            Dictionary<string, List<string>> in_process = new();
             Stack<string> s = new();
             Stack<List<string>> output = new();
             bool can_create = true;
 
             var ffact = item!.Split(":")[0].Trim();
             s.Push(ffact);
+
             while(s.Count > 0)
             {
                 List<string> factOut = new();
@@ -236,10 +245,10 @@ namespace ISTER
                 {
                     continue;
                 }
-                visited.Add(fact);
                 factOut.Add($"Необходим факт {fact} \"{facts[fact]}\"");
 
-                var missing_precs = facts_tree[fact];
+                var rule = rules[facts_to_rules[fact]];
+                var missing_precs = rule.preconds;
                 if (missing_precs == null)
                 {
                     factOut.Add("Для вывода факта ничего не требуется, однако он отсутствует в инвентаре");
@@ -247,28 +256,40 @@ namespace ISTER
                     break;
                 }
                 
-                var rule = rules[facts_to_rules[fact]];
                 factOut.Add($"Для него нужно правило {rule}");
 
                 factOut.Add($"Для правила необходимы факты: {string.Join(", ",missing_precs)}");
 
                 foreach(var prec in missing_precs)
                 {
-                    if (inventory.Contains(prec))
-                    {
-                        factOut.Add($"Факт {prec} содержится в инвентаре");
-                        continue;
-                    }
                     if (visited.Contains(prec))
                     {
-                        factOut.Add($"Факт {prec} \"{facts[prec]}\" был получен ранее (либо выводится)");
+                        factOut.Add($"Факт {prec} \"{facts[prec]}\" был получен ранее");
+                        continue;
+                    }
+                    if (in_process.ContainsKey(prec))
+                    {
+                        factOut.Add($"Факт {prec} \"{facts[prec]}\" в обработке");
+                        continue;
+                    }
+
+                    if (!in_process.ContainsKey(fact))
+                    {
+                        in_process.Add(fact, new List<string>());
+                    }
+                    in_process[fact].Add(prec);
+
+                    if (inventory.Contains(prec))
+                    {
+                        factOut.Add($"Факт {prec} \"{facts[prec]}\" содержится в инвентаре");
+                        clear_process(prec, ref in_process, ref visited);
                         continue;
                     }
                     s.Push(prec);
                 }
                 output.Push(factOut);
             }
-            if (!can_create)
+            if (!can_create || in_process.Count > 0)
             {
                 outputBox.AppendText("Вывод невозможен");
                 return;
@@ -283,8 +304,6 @@ namespace ISTER
                 outputBox.AppendText("------------");
                 outputBox.AppendText(Environment.NewLine);
             }
-
-
         }
         /// <summary>
         /// Возвращает список фактов, которые нужны для выполнения правила, возвращающего предоставленный факт
@@ -297,6 +316,11 @@ namespace ISTER
         }
 
         private void ruleBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
         {
 
         }

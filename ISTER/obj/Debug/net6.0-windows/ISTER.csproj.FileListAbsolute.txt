@@ -34,3 +34,5 @@ C:\Users\Alator\source\repos\CLIPSPIPS\ISTER\bin\Debug\net6.0-windows\ISTER.dll
 C:\Users\Alator\source\repos\CLIPSPIPS\ISTER\bin\Debug\net6.0-windows\ISTER.pdb
 C:\Users\Alator\source\repos\CLIPSPIPS\ISTER\obj\Debug\net6.0-windows\ISTER.genruntimeconfig.cache
 C:\Users\Alator\source\repos\CLIPSPIPS\ISTER\obj\Debug\net6.0-windows\ref\ISTER.dll
+C:\Users\Alator\source\repos\CLIPSPIPS\ISTER\bin\Debug\net6.0-windows\CLIPSCLRWrapper.dll
+C:\Users\Alator\source\repos\CLIPSPIPS\ISTER\obj\Debug\net6.0-windows\ISTER.csproj.CopyComplete
